@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>少言少语</title>
+    <link>https://jssdream.github.io</link>
+    <atom:link href="https://jssdream.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+    <description>静以修身，俭以养德</description>
+    <generator>Solo, v4.0.0, https://solo.b3log.org</generator>
+    <lastBuildDate>Fri, 03 Apr 2020 14:41:13 +0800</lastBuildDate>
+    <language>zh-cn</language>
+    <item>
+      <title>Github+jsDelivr为脚本/图片等静态文件加速的全球CDN</title>
+      <link>https://jssdream.github.io/articles/2020/04/01/1585736011733.html</link>
+      <description><![CDATA[<p><strong>jsDelivr CDN 全球加速访问GitHub</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2020/04/01/1585736011733.html</guid>
+      <category>随记</category>
+      <category>GitHub</category>
+      <category>分享</category>
+      <pubDate>Wed, 01 Apr 2020 18:37:37 +0800</pubDate>
+    </item>
+    <item>
+      <title>【薅羊毛】招商 APP- 理财福利</title>
+      <link>https://jssdream.github.io/articles/2020/03/27/1585289293648.html</link>
+      <description><![CDATA[<p>理财福利 活动网址： <a href="https://act.cmbchina.com/ActShipMobile/Pages/PointDrawDetail.aspx?ActGroupID=AGP20200324163540kGXdzzbH" target="_blank">https://act.cmbchina.com/ActShipMobile/Pages/PointDrawDetail.aspx?ActGroupID=AGP20200324163540kGXdzzbH</a>&amp;behavior_entryid=yyg003002&amp;version=8.1.5 或者打开招商APP找到学理财赢红包  需要支付1分钱买货币基金，随时可提取 红包抽奖最低6.6元，最高88元 &nbsp;重点有反馈说 2020 年买过的好像就不能参与了 二维码直通车  最低6.6元！最低6.6元！最低6.6元！真香！</p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2020/03/27/1585289293648.html</guid>
+      <category>推广</category>
+      <category>福利</category>
+      <category>薅羊毛</category>
+      <pubDate>Mon, 30 Mar 2020 10:59:58 +0800</pubDate>
+    </item>
+    <item>
+      <title>电影分享—小丑.Joker.2019.HD1080P. 韩版英语中字</title>
+      <link>https://jssdream.github.io/articles/2019/11/15/1573787853367.html</link>
+      <description><![CDATA[<p>前言   最近网上好像又开始疯传小丑了，这部电影一直想看，但一直没有看！这次周末必须看下，看看这部真实反映社会现状的神作是什么样的！！   强烈推荐！！</p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/11/15/1573787853367.html</guid>
+      <category>影视资源</category>
+      <category>分享</category>
+      <pubDate>Tue, 07 Jan 2020 10:46:44 +0800</pubDate>
+    </item>
+    <item>
+      <title>Jenkins—500错误分析(磁盘空间不足)</title>
+      <link>https://jssdream.github.io/articles/2019/12/13/1576226764937.html</link>
+      <description><![CDATA[<p><strong>记录一次Jenkins的500错误分析(磁盘空间不足)</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/12/13/1576226764937.html</guid>
+      <category>随记</category>
+      <category>Jenkins</category>
+      <category>魔鬼命令</category>
+      <pubDate>Fri, 13 Dec 2019 16:46:05 +0800</pubDate>
+    </item>
+    <item>
+      <title>分享工具箱(图床、短链、趣图、榜单、在线音乐)</title>
+      <link>https://jssdream.github.io/articles/2019/12/12/1576119045214.html</link>
+      <description><![CDATA[<p><strong>分享工具箱(图床、短链、趣图、榜单、在线音乐)</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/12/12/1576119045214.html</guid>
+      <category>Tools</category>
+      <category>分享</category>
+      <pubDate>Thu, 12 Dec 2019 11:05:55 +0800</pubDate>
+    </item>
+    <item>
+      <title>笔记—获取请求IP方法整理</title>
+      <link>https://jssdream.github.io/articles/2019/12/04/1575442618755.html</link>
+      <description><![CDATA[<p>获取请求IP方法整理</p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/12/04/1575442618755.html</guid>
+      <category>随记</category>
+      <category>Java</category>
+      <pubDate>Thu, 05 Dec 2019 14:32:12 +0800</pubDate>
+    </item>
+    <item>
+      <title>SpringBoot自定义参数解析器—HandlerMethodArgumentResolver</title>
+      <link>https://jssdream.github.io/articles/2019/11/08/1573203264692.html</link>
+      <description><![CDATA[<p><strong>SpringBoot自定义参数解析器—HandlerMethodArgumentResolver</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/11/08/1573203264692.html</guid>
+      <category>SpringBoot</category>
+      <category>随记</category>
+      <pubDate>Fri, 08 Nov 2019 16:55:08 +0800</pubDate>
+    </item>
+    <item>
+      <title>Spring Boot——@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)</title>
+      <link>https://jssdream.github.io/articles/2019/10/30/1572431859394.html</link>
+      <description><![CDATA[<p><strong>关于注解@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/10/30/1572431859394.html</guid>
+      <category>SpringBoot</category>
+      <category>随记</category>
+      <pubDate>Wed, 30 Oct 2019 18:38:17 +0800</pubDate>
+    </item>
+    <item>
+      <title>薅羊毛——0元撸腾讯云服务器(云硬盘...)</title>
+      <link>https://jssdream.github.io/articles/2019/10/29/1572314884193.html</link>
+      <description><![CDATA[<p><strong>0元撸腾讯云服务器</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/10/29/1572314884193.html</guid>
+      <category>分享</category>
+      <category>福利</category>
+      <category>薅羊毛</category>
+      <pubDate>Tue, 29 Oct 2019 10:08:04 +0800</pubDate>
+    </item>
+    <item>
+      <title>2019年京东双十一活动——全民养红包</title>
+      <link>https://jssdream.github.io/articles/2019/10/22/1571713204417.html</link>
+      <description><![CDATA[<p><strong>京东双十一活动——全民养红包脚本</strong></p>]]></description>
+      <author>JssDream</author>
+      <guid>https://jssdream.github.io/articles/2019/10/22/1571713204417.html</guid>
+      <category>分享</category>
+      <category>活动</category>
+      <category>福利</category>
+      <pubDate>Tue, 22 Oct 2019 11:00:04 +0800</pubDate>
+    </item>
+  </channel>
+</rss>
