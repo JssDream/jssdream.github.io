@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL对JSON类型的使用/查询/函数 | 少言少语</title><meta name="author" content="JssDream"><meta name="copyright" content="JssDream"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一,对记录的操作1.创建有json字段的表 12-- 创建表CREATE TABLE t_json(id INT PRIMARY KEY, sname VARCHAR(20) , info  JSON);  2.插入记录 123456-- 插入含有json数组的记录INSERT INTO t_json(id,sname,info) VALUES( 1, &amp;#x27;name1&amp;#x27;, JSO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL对JSON类型的使用&#x2F;查询&#x2F;函数">
+<meta property="og:url" content="https://jssdream.github.io/articles/2021/12/08/1638944634446.html">
+<meta property="og:site_name" content="少言少语">
+<meta property="og:description" content="一,对记录的操作1.创建有json字段的表 12-- 创建表CREATE TABLE t_json(id INT PRIMARY KEY, sname VARCHAR(20) , info  JSON);  2.插入记录 123456-- 插入含有json数组的记录INSERT INTO t_json(id,sname,info) VALUES( 1, &amp;#x27;name1&amp;#x27;, JSO">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/120844-1590638924eed3.jpg">
+<meta property="article:published_time" content="2021-12-08T06:23:54.000Z">
+<meta property="article:modified_time" content="2021-12-08T06:23:54.000Z">
+<meta property="article:author" content="JssDream">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="JSON">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/120844-1590638924eed3.jpg"><link rel="shortcut icon" href="/images/favicon0.png"><link rel="canonical" href="https://jssdream.github.io/articles/2021/12/08/1638944634446.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: {"limitDay":100,"position":"top","messagePrev":"本文自上次更新已经过了","messageNext":"天，文章的内容可能已过时，若内容或图片失效，请留言反馈。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL对JSON类型的使用/查询/函数',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-08 14:23:54'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://avatars.githubusercontent.com/u/24471999" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">68</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://img.tfish.eu.org/"><i class="fa-fw fas fa-images"></i><span> 图床</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/120844-1590638924eed3.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="少言少语"><span class="site-name">少言少语</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://img.tfish.eu.org/"><i class="fa-fw fas fa-images"></i><span> 图床</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">MySQL对JSON类型的使用/查询/函数</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-08T06:23:54.000Z" title="发表于 2021-12-08 14:23:54">2021-12-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-12-08T06:23:54.000Z" title="更新于 2021-12-08 14:23:54">2021-12-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="MySQL对JSON类型的使用/查询/函数"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="一-对记录的操作"><a href="#一-对记录的操作" class="headerlink" title="一,对记录的操作"></a>一,对记录的操作</h1><p>1.创建有json字段的表</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-- 创建表</span><br><span class="line">CREATE TABLE t_json(id INT PRIMARY KEY, sname VARCHAR(20) , info  JSON);</span><br></pre></td></tr></table></figure>
+
+<p>2.插入记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-- 插入含有json数组的记录</span><br><span class="line">INSERT INTO t_json(id,sname,info) VALUES( 1, &#x27;name1&#x27;, JSON_ARRAY(1, &quot;abc&quot;, NULL, TRUE, CURTIME()));</span><br><span class="line"></span><br><span class="line">-- 插入含有json对象的记录</span><br><span class="line">INSERT INTO t_json(id,sname,info) VALUES( 2, &#x27;name2&#x27;, JSON_OBJECT(&quot;age&quot;, 20, &quot;time&quot;, now()));</span><br><span class="line">INSERT INTO t_json(id,sname,info) VALUES( 3, &#x27;name3&#x27;, &#x27;&#123;&quot;age&quot;:20, &quot;time&quot;:&quot;2018-07-14 10:52:00&quot;&#125;&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>3.查询记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- 查询记录</span><br><span class="line">SELECT sname,JSON_EXTRACT(info,&#x27;$.age&#x27;) FROM t_json;</span><br><span class="line">SELECT sname,info-&gt;&#x27;$.age&#x27; FROM t_json;</span><br><span class="line">-- 查询key</span><br><span class="line">SELECT id,json_keys(info) FROM t_json;</span><br></pre></td></tr></table></figure>
+<p>4.修改记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- 增加键</span><br><span class="line">UPDATE t_json SET info = json_set(info,&#x27;$.ip&#x27;,&#x27;192.168.1.1&#x27;) WHERE id = 2;</span><br><span class="line"></span><br><span class="line">-- 变更值</span><br><span class="line">UPDATE t_json SET info = json_set(info,&#x27;$.ip&#x27;,&#x27;192.168.1.2&#x27;) WHERE id = 2;</span><br><span class="line"></span><br><span class="line">-- 删除键</span><br><span class="line">UPDATE t_json SET info = json_remove(info,&#x27;$.ip&#x27;) WHERE id = 2;</span><br></pre></td></tr></table></figure>
+
+<h1 id="二-创建json值函数"><a href="#二-创建json值函数" class="headerlink" title="二,创建json值函数"></a>二,创建json值函数</h1><p>1.JSON_ARRAY 生成json数组</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_ARRAY(val1,val2,val3...)</span><br><span class="line">-- 生成一个包含指定元素的json数组。</span><br><span class="line">SELECT JSON_ARRAY(1, &quot;abc&quot;, NULL, TRUE, CURTIME()); -- [1, &quot;abc&quot;, null, true, &quot;10:37:08.000000&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>2.JSON_OBJECT 生成json对象</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_OBJECT(key1,val1,key2,val2...)</span><br><span class="line">-- 生成一个包含指定K-V对的json object。如果有key为NULL或参数个数为奇数，则抛错。</span><br><span class="line">SELECT JSON_OBJECT(&#x27;age&#x27;, 20, &#x27;time&#x27;, now()); -- &#123;&quot;age&quot;: 20, &quot;time&quot;: &quot;2021-06-18 14:49:57.000000&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3.JSON_QUOTE 加”号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_QUOTE(json_val)</span><br><span class="line">-- 将json_val用&quot;号括起来。</span><br><span class="line">SELECT JSON_QUOTE(&#x27;[1,2,3]&#x27;); -- &quot;[1,2,3]&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="三-搜索json值函数"><a href="#三-搜索json值函数" class="headerlink" title="三,搜索json值函数"></a>三,搜索json值函数</h1><p>1.JSON_CONTAINS 指定数据是否存在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">set @j = &#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: &#123;&quot;d&quot;: 4&#125;&#125;&#x27;;</span><br><span class="line">-- JSON_CONTAINS(json_doc, val[, path])</span><br><span class="line">-- 查询json文档是否在指定path包含指定的数据，包含则返回1，否则返回0。如果有参数为NULL或path不存在，则返回NULL。</span><br><span class="line">SELECT JSON_CONTAINS(@j, &#x27;4&#x27;, &#x27;$.c.d&#x27;); -- 1</span><br></pre></td></tr></table></figure>
+
+<p>2.JSON_CONTAINS_PATH 指定路径是否存在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_CONTAINS_PATH(json_doc, one_or_all, path[, path] ...)</span><br><span class="line">-- 查询是否存在指定路径，存在则返回1，否则返回0。如果有参数为NULL，则返回NULL。</span><br><span class="line">-- one_or_all只能取值&quot;one&quot;或&quot;all&quot;，one表示只要有一个存在即可；all表示所有的都存在才行。</span><br><span class="line">SELECT JSON_CONTAINS_PATH(@j, &#x27;one&#x27;, &#x27;$.a&#x27;, &#x27;$.e&#x27;); -- 1</span><br><span class="line">SELECT JSON_CONTAINS_PATH(@j, &#x27;all&#x27;, &#x27;$.a&#x27;, &#x27;$.c.d&#x27;); -- 1</span><br></pre></td></tr></table></figure>
+
+<p>3.JSON_EXTRACT 查找所有指定数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_EXTRACT(json_doc, path[, path] ...)</span><br><span class="line">-- 从json文档里抽取数据。如果有参数有NULL或path不存在，则返回NULL。如果抽取出多个path，则返回的数据封闭在一个json array里。</span><br><span class="line">set @j2 = &#x27;[10, 20, [30, 40]]&#x27;;</span><br><span class="line">SELECT JSON_EXTRACT(&#x27;[10, 20, [30, 40]]&#x27;, &#x27;$[1]&#x27;); -- 20</span><br><span class="line">SELECT JSON_EXTRACT(&#x27;[10, 20, [30, 40]]&#x27;, &#x27;$[1]&#x27;, &#x27;$[0]&#x27;); -- [20, 10]</span><br><span class="line">SELECT JSON_EXTRACT(&#x27;[10, 20, [30, 40]]&#x27;, &#x27;$[2][*]&#x27;); -- [30, 40]</span><br></pre></td></tr></table></figure>
+<p>4.JSON_KEYS 查找所有指定键值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_KEYS(json_doc[, path])</span><br><span class="line">-- 获取json文档在指定路径下的所有键值，返回一个json array。如果有参数为NULL或path不存在，则返回NULL。</span><br><span class="line">SELECT JSON_KEYS(&#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: &#123;&quot;c&quot;: 30&#125;&#125;&#x27;); -- [&quot;a&quot;, &quot;b&quot;]</span><br><span class="line">SELECT JSON_KEYS(&#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: &#123;&quot;c&quot;: 30&#125;&#125;&#x27;, &#x27;$.b&#x27;); -- [&quot;c&quot;]</span><br><span class="line">SELECT id,json_keys(info) FROM t_json;</span><br></pre></td></tr></table></figure>
+
+<p>5.JSON_SEARCH 查找所有指定值的位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_SEARCH(json_doc, one_or_all, search_str[, escape_char[, path] ...])</span><br><span class="line">-- 查询包含指定字符串的paths，并作为一个json array返回。如果有参数为NUL或path不存在，则返回NULL。</span><br><span class="line">-- one_or_all：&quot;one&quot;表示查询到一个即返回；&quot;all&quot;表示查询所有。</span><br><span class="line">-- search_str：要查询的字符串。 可以用LIKE里的&#x27;%&#x27;或‘_’匹配。</span><br><span class="line">-- path：在指定path下查。</span><br><span class="line">SET @j3 = &#x27;[&quot;abc&quot;, [&#123;&quot;k&quot;: &quot;10&quot;&#125;, &quot;def&quot;], &#123;&quot;x&quot;:&quot;abc&quot;&#125;, &#123;&quot;y&quot;:&quot;bcd&quot;&#125;]&#x27;;</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;one&#x27;, &#x27;abc&#x27;); -- &quot;$[0]&quot;</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;all&#x27;, &#x27;abc&#x27;); -- [&quot;$[0]&quot;, &quot;$[2].x&quot;]</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;all&#x27;, &#x27;abc&#x27;, NULL, &#x27;$[2]&#x27;); -- &quot;$[2].x&quot;</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;all&#x27;, &#x27;10&#x27;); -- &quot;$[1][0].k&quot;</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;all&#x27;, &#x27;%b%&#x27;); -- [&quot;$[0]&quot;, &quot;$[2].x&quot;, &quot;$[3].y&quot;]</span><br><span class="line">SELECT JSON_SEARCH(@j3, &#x27;all&#x27;, &#x27;%b%&#x27;, NULL, &#x27;$[2]&#x27;); -- &quot;$[2].x&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="四-修改json值函数"><a href="#四-修改json值函数" class="headerlink" title="四,修改json值函数"></a>四,修改json值函数</h1><p>1.JSON_ARRAY_APPEND  指定位置追加数组元素</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_ARRAY_APPEND(json_doc, path, val[, path, val] ...)</span><br><span class="line">-- 在指定path的json array尾部追加val。如果指定path是一个json object，则将其封装成一个json array再追加。如果有参数为NULL，则返回NULL。</span><br><span class="line">SET @j4 = &#x27;[&quot;a&quot;, [&quot;b&quot;, &quot;c&quot;], &quot;d&quot;]&#x27;;</span><br><span class="line">-- SELECT JSON_ARRAY_APPEND(@j4, &#x27;$[1][0]&#x27;, 3); -- [&quot;a&quot;, [[&quot;b&quot;, 3], &quot;c&quot;], &quot;d&quot;]</span><br><span class="line">SET @j5 = &#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: [2, 3], &quot;c&quot;: 4&#125;&#x27;;</span><br><span class="line">SELECT JSON_ARRAY_APPEND(@j5, &#x27;$.b&#x27;, &#x27;x&#x27;); -- &#123;&quot;a&quot;: 1, &quot;b&quot;: [2, 3, &quot;x&quot;], &quot;c&quot;: 4&#125; </span><br><span class="line">SELECT JSON_ARRAY_APPEND(@j5, &#x27;$.c&#x27;, &#x27;y&#x27;); -- &#123;&quot;a&quot;: 1, &quot;b&quot;: [2, 3], &quot;c&quot;: [4, &quot;y&quot;]&#125;</span><br><span class="line">SELECT JSON_ARRAY_APPEND(@j5, &#x27;$&#x27;, &#x27;z&#x27;); -- [&#123;&quot;a&quot;: 1, &quot;b&quot;: [2, 3], &quot;c&quot;: 4&#125;, &quot;z&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>2.JSON_ARRAY_INSERT 指定位置插入数组元素</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_ARRAY_INSERT(json_doc, path, val[, path, val] ...)</span><br><span class="line">-- 在path指定的json array元素插入val，原位置及以右的元素顺次右移。如果path指定的数据非json array元素，则略过此val；如果指定的元素下标超过json array的长度，则插入尾部。</span><br><span class="line">SET @j6 = &#x27;[&quot;a&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, 4]]&#x27;;</span><br><span class="line">SELECT JSON_ARRAY_INSERT(@j6, &#x27;$[1]&#x27;, &#x27;x&#x27;); -- [&quot;a&quot;, &quot;x&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, 4]]</span><br><span class="line">SELECT JSON_ARRAY_INSERT(@j6, &#x27;$[100]&#x27;, &#x27;x&#x27;); -- [&quot;a&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, 4], &quot;x&quot;]</span><br><span class="line">SELECT JSON_ARRAY_INSERT(@j6, &#x27;$[1].b[0]&#x27;, &#x27;x&#x27;); -- [&quot;a&quot;, &#123;&quot;b&quot;: [&quot;x&quot;, 1, 2]&#125;, [3, 4]]</span><br><span class="line">SELECT JSON_ARRAY_INSERT(@j6, &#x27;$[0]&#x27;, &#x27;x&#x27;, &#x27;$[3][1]&#x27;, &#x27;y&#x27;); -- [&quot;x&quot;, &quot;a&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, &quot;y&quot;, 4]]</span><br></pre></td></tr></table></figure>
+
+<p>3.JSON_INSERT 指定位置插入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_INSERT(json_doc, path, val[, path, val] ...)</span><br><span class="line">-- 在指定path下插入数据，如果path已存在，则忽略此val（不存在才插入）。</span><br><span class="line">SET @j7 = &#x27;&#123; &quot;a&quot;: 1, &quot;b&quot;: [2, 3]&#125;&#x27;;</span><br><span class="line">SELECT JSON_INSERT(@j7, &#x27;$.a&#x27;, 10, &#x27;$.c&#x27;, &#x27;[true, false]&#x27;); -- &#123;&quot;a&quot;: 1, &quot;b&quot;: [2, 3], &quot;c&quot;: &quot;[true, false]&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>4.JSON_REPLACE 指定位置替换</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_REPLACE(json_doc, path, val[, path, val] ...)</span><br><span class="line">-- 替换指定路径的数据，如果某个路径不存在则略过（存在才替换）。如果有参数为NULL，则返回NULL。</span><br><span class="line">SELECT JSON_REPLACE(@j7, &#x27;$.a&#x27;, 10, &#x27;$.c&#x27;, &#x27;[true, false]&#x27;); -- &#123;&quot;a&quot;: 10, &quot;b&quot;: [2, 3]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5.JSON_SET 指定位置设置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_SET(json_doc, path, val[, path, val] ...)</span><br><span class="line">-- 设置指定路径的数据（不管是否存在）。如果有参数为NULL，则返回NULL。</span><br><span class="line">SELECT JSON_SET(@j7, &#x27;$.a&#x27;, 10, &#x27;$.c&#x27;, &#x27;[true, false]&#x27;); -- &#123;&quot;a&quot;: 10, &quot;b&quot;: [2, 3], &quot;c&quot;: &quot;[true, false]&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>6.JSON_MERGE 合并</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_MERGE(json_doc, json_doc[, json_doc] ...)</span><br><span class="line">-- merge多个json文档。规则如下：</span><br><span class="line">-- 如果都是json array，则结果自动merge为一个json array；</span><br><span class="line">-- 如果都是json object，则结果自动merge为一个json object；</span><br><span class="line">-- 如果有多种类型，则将非json array的元素封装成json array再按照规则一进行mege。</span><br><span class="line">SELECT JSON_MERGE(&#x27;[1, 2]&#x27;, &#x27;[true, false]&#x27;); -- [1, 2, true, false]</span><br><span class="line">SELECT JSON_MERGE(&#x27;&#123;&quot;name&quot;: &quot;x&quot;&#125;&#x27;, &#x27;&#123;&quot;id&quot;: 47&#125;&#x27;); -- &#123;&quot;id&quot;: 47, &quot;name&quot;: &quot;x&quot;&#125;</span><br><span class="line">SELECT JSON_MERGE(&#x27;1&#x27;, &#x27;true&#x27;); -- [1, true]</span><br><span class="line">SELECT JSON_MERGE(&#x27;[1, 2]&#x27;, &#x27;&#123;&quot;id&quot;: 47&#125;&#x27;); -- [1, 2, &#123;&quot;id&quot;: 47&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>7.JSON_REMOVE 指定位置移除</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_REMOVE(json_doc, path[, path] ...)</span><br><span class="line">-- 移除指定路径的数据，如果某个路径不存在则略过此路径。如果有参数为NULL，则返回NULL。</span><br><span class="line">SET @j8 = &#x27;[&quot;a&quot;, [&quot;b&quot;, &quot;c&quot;], &quot;d&quot;]&#x27;;</span><br><span class="line">SELECT JSON_REMOVE(@j8, &#x27;$[1]&#x27;); -- [&quot;a&quot;, &quot;d&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>8.JSON_UNQUOTE 去”号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_UNQUOTE(val)</span><br><span class="line">-- 去掉val的引号。如果val为NULL，则返回NULL。</span><br><span class="line">SELECT JSON_UNQUOTE(&quot;\&quot;123\&quot;&quot;); -- 123</span><br></pre></td></tr></table></figure>
+
+<h1 id="五-返回json值属性的函数"><a href="#五-返回json值属性的函数" class="headerlink" title="五,返回json值属性的函数"></a>五,返回json值属性的函数</h1><p>1.JSON_DEPTH 深度</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_DEPTH(json_doc)</span><br><span class="line">-- 获取json文档的深度。如果参数为NULL，则返回NULL。</span><br><span class="line">-- 空的json array、json object或标量的深度为1。</span><br><span class="line">SELECT JSON_DEPTH(&#x27;&#123;&#125;&#x27;), JSON_DEPTH(&#x27;[]&#x27;), JSON_DEPTH(&#x27;true&#x27;); -- 1 1 1</span><br><span class="line">SELECT JSON_DEPTH(&#x27;[10, 20]&#x27;), JSON_DEPTH(&#x27;[[], &#123;&#125;]&#x27;); -- 2 2</span><br><span class="line">SELECT JSON_DEPTH(&#x27;[10, &#123;&quot;a&quot;: 20&#125;]&#x27;); -- 3</span><br></pre></td></tr></table></figure>
+
+<p>2.JSON_LENGTH 长度</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_LENGTH(json_doc[, path])</span><br><span class="line">-- 获取指定路径下的长度。如果参数为NULL，则返回NULL。　</span><br><span class="line">-- 长度的计算规则：</span><br><span class="line">-- 标量的长度为1；</span><br><span class="line">-- json array的长度为元素的个数；</span><br><span class="line">-- json object的长度为key的个数。</span><br><span class="line">SELECT JSON_LENGTH(&#x27;[1, 2, &#123;&quot;a&quot;: 3&#125;]&#x27;); -- 3</span><br><span class="line">SELECT JSON_LENGTH(&#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: &#123;&quot;c&quot;: 30&#125;&#125;&#x27;); -- 2</span><br><span class="line">SELECT JSON_LENGTH(&#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: &#123;&quot;c&quot;: 30&#125;&#125;&#x27;, &#x27;$.b&#x27;); -- 1</span><br></pre></td></tr></table></figure>
+<p>3.JSON_TYPE 类型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_TYPE(json_val)</span><br><span class="line">-- 获取json文档的具体类型。如果参数为NULL，则返回NULL。</span><br><span class="line">select JSON_TYPE(&#x27;[1,2]&#x27;); -- ARRAY</span><br></pre></td></tr></table></figure>
+
+<p>4.JSON_VALID 是否有效json格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-- JSON_VALID(val)</span><br><span class="line">-- 判断val是否为有效的json格式，是为1，不是为0。如果参数为NUL，则返回NULL。</span><br><span class="line">SELECT JSON_VALID(&#x27;&#123;&quot;a&quot;: 1&#125;&#x27;); -- 1</span><br><span class="line">SELECT JSON_VALID(&#x27;hello&#x27;), JSON_VALID(&#x27;&quot;hello&quot;&#x27;); -- 1</span><br></pre></td></tr></table></figure>
+
+<p>附录:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">JSON_ARRAY 生成json数组</span><br><span class="line">JSON_OBJECT 生成json对象</span><br><span class="line">JSON_QUOTE 加&quot;号</span><br><span class="line">JSON_CONTAINS 指定数据是否存在</span><br><span class="line">JSON_CONTAINS_PATH 指定路径是否存在</span><br><span class="line">JSON_EXTRACT 查找所有指定数据</span><br><span class="line">JSON_KEYS 查找所有指定键值</span><br><span class="line">JSON_SEARCH 查找所有指定值的位置</span><br><span class="line">JSON_ARRAY_APPEND  指定位置追加数组元素</span><br><span class="line">JSON_ARRAY_INSERT 指定位置插入数组元素</span><br><span class="line">JSON_INSERT 指定位置插入</span><br><span class="line">JSON_REPLACE 指定位置替换</span><br><span class="line">JSON_SET 指定位置设置</span><br><span class="line">JSON_MERGE 合并</span><br><span class="line">JSON_REMOVE 指定位置移除</span><br><span class="line">JSON_UNQUOTE 去&quot;号</span><br><span class="line">JSON_DEPTH 深度</span><br><span class="line">JSON_LENGTH 长度</span><br><span class="line">JSON_TYPE 类型</span><br><span class="line">JSON_VALID 是否有效json格式</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-append"><code>JSON_APPEND()</code></a>（废弃的5.7.9）</td>
+<td>JSON文件追加数据</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-creation-functions.html#function_json-array"><code>JSON_ARRAY()</code></a></td>
+<td>创建JSON数组</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-array-append"><code>JSON_ARRAY_APPEND()</code></a></td>
+<td>JSON文件追加数据</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-array-insert"><code>JSON_ARRAY_INSERT()</code></a></td>
+<td>插入JSON数组</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#operator_json-column-path"><code>-&gt;</code></a></td>
+<td>在评估路径返回JSON列值；相当于json_extract()。</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-contains"><code>JSON_CONTAINS()</code></a></td>
+<td>是否包含特定对象的JSON文档路径</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-contains-path"><code>JSON_CONTAINS_PATH()</code></a></td>
+<td>无论是JSON文件包含任何数据路径</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-depth"><code>JSON_DEPTH()</code></a></td>
+<td>JSON文档的最大深度</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-extract"><code>JSON_EXTRACT()</code></a></td>
+<td>从JSON文档返回数据</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#operator_json-inline-path"><code>-&gt;&gt;</code></a></td>
+<td>在评估路径和结束引语结果返回JSON列值；相当于json_unquote（json_extract()）。</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-insert"><code>JSON_INSERT()</code></a></td>
+<td>将数据插入到JSON文档</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-keys"><code>JSON_KEYS()</code></a></td>
+<td>从JSON文件密钥数组</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-length"><code>JSON_LENGTH()</code></a></td>
+<td>在JSON文档中的元素数</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-merge"><code>JSON_MERGE()</code></a>（废弃的5.7.22）</td>
+<td>合并的JSON文件，保存重复键。不json_merge_preserve()的同义词</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-merge-patch"><code>JSON_MERGE_PATCH()</code></a></td>
+<td>合并的JSON文件，免去重复键的值</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-merge-preserve"><code>JSON_MERGE_PRESERVE()</code></a></td>
+<td>合并的JSON文件，保存重复键</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-creation-functions.html#function_json-object"><code>JSON_OBJECT()</code></a></td>
+<td>创建JSON对象</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-utility-functions.html#function_json-pretty"><code>JSON_PRETTY()</code></a></td>
+<td>版画在人类可读的格式JSON文档，每个数组元素或对象成员打印在新的行中，缩进两个空格就其母。</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-creation-functions.html#function_json-quote"><code>JSON_QUOTE()</code></a></td>
+<td>引用JSON文档</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-remove"><code>JSON_REMOVE()</code></a></td>
+<td>从JSON文件中删除数据</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-replace"><code>JSON_REPLACE()</code></a></td>
+<td>在JSON文件的值替换</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-search"><code>JSON_SEARCH()</code></a></td>
+<td>在JSON文件价值路径</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-set"><code>JSON_SET()</code></a></td>
+<td>将数据插入到JSON文档</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-utility-functions.html#function_json-storage-size"><code>JSON_STORAGE_SIZE()</code></a></td>
+<td>用于一个JSON文件的二进制表示形式存储空间；一个JSON柱，空间时使用的文档插入到任何部分更新之前，</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-type"><code>JSON_TYPE()</code></a></td>
+<td>JSON值类型</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-unquote"><code>JSON_UNQUOTE()</code></a></td>
+<td>JSON值而言</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-attribute-functions.html#function_json-valid"><code>JSON_VALID()</code></a></td>
+<td>JSON值是否是有效的</td>
+</tr>
+</tbody></table>
+<p>mysql官方文档: <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-utility-functions.html">https://dev.mysql.com/doc/refman/5.7/en/json-utility-functions.html</a></p>
+<blockquote>
+<p>参考:<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/waterystone/p/5626098.html">https://www.cnblogs.com/waterystone/p/5626098.html</a>  	<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ooo0/p/9309277.html">https://www.cnblogs.com/ooo0/p/9309277.html</a></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://jssdream.github.io">JssDream</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://jssdream.github.io/articles/2021/12/08/1638944634446.html">https://jssdream.github.io/articles/2021/12/08/1638944634446.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://jssdream.github.io" target="_blank">少言少语</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/JSON/">JSON</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/120844-1590638924eed3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>赞助</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/images/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/images/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/articles/2021/12/03/1638516438999.html" title="基于 springBoot 实现webSocket方式的扫码登录"><img class="cover" src="https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/174035-1523958035455e.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">基于 springBoot 实现webSocket方式的扫码登录</div></div></a></div><div class="next-post pull-right"><a href="/articles/2021/12/09/1639029495498.html" title="Intellij IDEA 高效使用教程(插件)"><img class="cover" src="https://b3logfile.com/file/2021/12/image-ca86f256.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Intellij IDEA 高效使用教程(插件)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/articles/2019/08/28/1566980010076.html" title="Linux定时备份Docker的MySQL数据库"><img class="cover" src="https://img.hacpai.com/bing/20171105.jpg?imageView2/1/w/960/h/540/interlace/1/q/100" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-28</div><div class="title">Linux定时备份Docker的MySQL数据库</div></div></a></div><div><a href="/articles/2019/08/27/1566878096384.html" title="修改MySQL密码"><img class="cover" src="https://img.hacpai.com/bing/20181219.jpg?imageView2/1/w/960/h/540/interlace/1/q/100" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-27</div><div class="title">修改MySQL密码</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/24471999" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">JssDream</div><div class="author-info__description">少言少语</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">49</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">68</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/JssDream"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/JssDream" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:jshao817@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://t.me/jssmile" target="_blank" title="Telegram"><i class="fab fa-telegram" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到少言少语 ^-^</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80-%E5%AF%B9%E8%AE%B0%E5%BD%95%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">一,对记录的操作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C-%E5%88%9B%E5%BB%BAjson%E5%80%BC%E5%87%BD%E6%95%B0"><span class="toc-number">2.</span> <span class="toc-text">二,创建json值函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89-%E6%90%9C%E7%B4%A2json%E5%80%BC%E5%87%BD%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">三,搜索json值函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B-%E4%BF%AE%E6%94%B9json%E5%80%BC%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">四,修改json值函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94-%E8%BF%94%E5%9B%9Ejson%E5%80%BC%E5%B1%9E%E6%80%A7%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">五,返回json值属性的函数</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/articles/2022/06/22/1655886812960.html" title="Guava RateLimiter"><img src="https://b3logfile.com/bing/20210707.jpg?imageView2/1/w/960/h/540/interlace/1/q/100" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Guava RateLimiter"/></a><div class="content"><a class="title" href="/articles/2022/06/22/1655886812960.html" title="Guava RateLimiter">Guava RateLimiter</a><time datetime="2022-06-22T08:33:33.000Z" title="发表于 2022-06-22 16:33:33">2022-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/21/202206/%E6%B3%A8%E8%A7%A3%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E7%9A%84%E8%84%B1%E6%95%8F/" title="注解实现接口数据的脱敏"><img src="https://b3logfile.com/bing/20201017.jpg?imageView2/1/w/960/h/540/interlace/1/q/100" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="注解实现接口数据的脱敏"/></a><div class="content"><a class="title" href="/2022/06/21/202206/%E6%B3%A8%E8%A7%A3%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E7%9A%84%E8%84%B1%E6%95%8F/" title="注解实现接口数据的脱敏">注解实现接口数据的脱敏</a><time datetime="2022-06-21T14:46:58.000Z" title="发表于 2022-06-21 22:46:58">2022-06-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/articles/2022/03/21/1647844375128.html" title="面试：String 为什么是不可变的？"><img src="https://b3logfile.com/file/2022/03/3-9c469d7a.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="面试：String 为什么是不可变的？"/></a><div class="content"><a class="title" href="/articles/2022/03/21/1647844375128.html" title="面试：String 为什么是不可变的？">面试：String 为什么是不可变的？</a><time datetime="2022-03-21T06:32:55.000Z" title="发表于 2022-03-21 14:32:55">2022-03-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/articles/2022/03/01/1646129161684.html" title="Spring Boot Admin 使用"><img src="https://b3logfile.com/file/2022/03/17-f21af511.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring Boot Admin 使用"/></a><div class="content"><a class="title" href="/articles/2022/03/01/1646129161684.html" title="Spring Boot Admin 使用">Spring Boot Admin 使用</a><time datetime="2022-03-01T10:06:01.000Z" title="发表于 2022-03-01 18:06:01">2022-03-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/articles/2021/12/09/1639029495498.html" title="Intellij IDEA 高效使用教程(插件)"><img src="https://b3logfile.com/file/2021/12/image-ca86f256.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intellij IDEA 高效使用教程(插件)"/></a><div class="content"><a class="title" href="/articles/2021/12/09/1639029495498.html" title="Intellij IDEA 高效使用教程(插件)">Intellij IDEA 高效使用教程(插件)</a><time datetime="2021-12-09T05:58:15.000Z" title="发表于 2021-12-09 13:58:15">2021-12-09</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://cdn.jsdelivr.net/gh/JssDream/image-hosting/img/120844-1590638924eed3.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2023 By JssDream</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div></body></html>
