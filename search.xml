@@ -240,11 +240,11 @@
             
             <tag> Java </tag>
             
-            <tag> 多线程 </tag>
-            
             <tag> JUC </tag>
             
             <tag> 线程池 </tag>
+            
+            <tag> 多线程 </tag>
             
         </tags>
       
@@ -271,9 +271,9 @@
             
             <tag> Java </tag>
             
-            <tag> 并发 </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> 并发 </tag>
             
             <tag> 原子 </tag>
             
@@ -1125,11 +1125,11 @@
       
         <tags>
             
+            <tag> Nginx </tag>
+            
             <tag> Linux </tag>
             
             <tag> 随记 </tag>
-            
-            <tag> Nginx </tag>
             
             <tag> 魔鬼命令 </tag>
             
@@ -1191,9 +1191,9 @@
             
             <tag> 随记 </tag>
             
-            <tag> Docker </tag>
-            
             <tag> 魔鬼命令 </tag>
+            
+            <tag> Docker </tag>
             
             <tag> MySQL </tag>
             
@@ -1346,9 +1346,9 @@
             
             <tag> SpringBoot </tag>
             
-            <tag> CORS跨域 </tag>
-            
             <tag> Spring </tag>
+            
+            <tag> CORS跨域 </tag>
             
         </tags>
       
