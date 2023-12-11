@@ -32,8 +32,8 @@
     
     <entry>
       <title>注解实现接口数据的脱敏</title>
-      <link href="/2022/06/21/202206/%E6%B3%A8%E8%A7%A3%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E7%9A%84%E8%84%B1%E6%95%8F/"/>
-      <url>/2022/06/21/202206/%E6%B3%A8%E8%A7%A3%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E7%9A%84%E8%84%B1%E6%95%8F/</url>
+      <link href="//articles/2022/06/21/1655822818000.html"/>
+      <url>//articles/2022/06/21/1655822818000.html</url>
       
         <content type="html"><![CDATA[<h2 id="注解实现数据脱敏"><a href="#注解实现数据脱敏" class="headerlink" title="注解实现数据脱敏"></a>注解实现数据脱敏</h2><p>通常接口返回值中的一些敏感数据也是要脱敏的，比如<strong>身份证号</strong> 、<strong>手机号码</strong> 、<strong>地址</strong> …..通常的手段就是用 <code>*</code>隐藏一部分数据，当然也可以根据自己需求定制。</p><p>言归正传，如何优雅的实现呢？有两种实现方案，如下：</p><ul><li>整合Mybatis插件，在查询的时候针对特定的字段进行脱敏</li><li>整合Jackson，在序列化阶段对特定字段进行脱敏</li><li>基于<code>Sharding Sphere</code>实现数据脱敏，查看之前的文章：<a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493021&idx=2&sn=f27a4eeb6dd3eb5b1551eabf6e31739e&chksm=fcf73a50cb80b3465e6f7cf1fd841bfec098fcde47c587a2c35e7793bad3b33ebe8f2433d3ff&token=1439687168&lang=zh_CN&scene=21#wechat_redirect">基于Sharding Sphere实现数据“一键脱敏”</a></li></ul><p>第一种方案网上很多实现方式，下面演示第二种，整合Jackson。</p><h3 id="1-自定义一个Jackson注解"><a href="#1-自定义一个Jackson注解" class="headerlink" title="1. 自定义一个Jackson注解"></a>1. 自定义一个Jackson注解</h3><p>需要自定义一个脱敏注解，一旦有属性被标注，则进行对应得脱敏，如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 自定义jackson注解，标注在属性上</span><br><span class="line"> */</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Target(ElementType.FIELD)</span><br><span class="line">@JacksonAnnotationsInside</span><br><span class="line">@JsonSerialize(using = SensitiveJsonSerializer.class)</span><br><span class="line">public @interface Sensitive &#123;</span><br><span class="line">    //脱敏策略</span><br><span class="line">    SensitiveStrategy strategy();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="2-定制脱敏策略"><a href="#2-定制脱敏策略" class="headerlink" title="2. 定制脱敏策略"></a>2. 定制脱敏策略</h3><p>针对项目需求，定制不同字段的脱敏规则，比如手机号中间几位用 <code>*</code>替代，如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 脱敏策略，枚举类，针对不同的数据定制特定的策略</span><br><span class="line"> */</span><br><span class="line">public enum SensitiveStrategy &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 用户名</span><br><span class="line">     */</span><br><span class="line">    USERNAME(s -&gt; s.replaceAll(&quot;(\\S)\\S(\\S*)&quot;, &quot;$1*$2&quot;)),</span><br><span class="line">    /**</span><br><span class="line">     * 身份证</span><br><span class="line">     */</span><br><span class="line">    ID_CARD(s -&gt; s.replaceAll(&quot;(\\d&#123;4&#125;)\\d&#123;10&#125;(\\w&#123;4&#125;)&quot;, &quot;$1****$2&quot;)),</span><br><span class="line">    /**</span><br><span class="line">     * 手机号</span><br><span class="line">     */</span><br><span class="line">    PHONE(s -&gt; s.replaceAll(&quot;(\\d&#123;3&#125;)\\d&#123;4&#125;(\\d&#123;4&#125;)&quot;, &quot;$1****$2&quot;)),</span><br><span class="line">    /**</span><br><span class="line">     * 地址</span><br><span class="line">     */</span><br><span class="line">    ADDRESS(s -&gt; s.replaceAll(&quot;(\\S&#123;3&#125;)\\S&#123;2&#125;(\\S*)\\S&#123;2&#125;&quot;, &quot;$1****$2****&quot;));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private final Function&lt;String, String&gt; desensitizer;</span><br><span class="line"></span><br><span class="line">    SensitiveStrategy(Function&lt;String, String&gt; desensitizer) &#123;</span><br><span class="line">        this.desensitizer = desensitizer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Function&lt;String, String&gt; desensitizer() &#123;</span><br><span class="line">        return desensitizer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>以上只是提供了部分，具体根据自己项目要求进行配置。</p><h3 id="3-定制JSON序列化实现"><a href="#3-定制JSON序列化实现" class="headerlink" title="3. 定制JSON序列化实现"></a>3. 定制JSON序列化实现</h3><p>下面将是重要实现，对标注注解 <code>@Sensitive</code>的字段进行脱敏，实现如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 序列化注解自定义实现</span><br><span class="line"> * JsonSerializer&lt;String&gt;：指定String 类型，serialize()方法用于将修改后的数据载入</span><br><span class="line"> */</span><br><span class="line">public class SensitiveJsonSerializer extends JsonSerializer&lt;String&gt; implements ContextualSerializer &#123;</span><br><span class="line">    private SensitiveStrategy strategy;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException &#123;</span><br><span class="line">        gen.writeString(strategy.desensitizer().apply(value));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获取属性上的注解属性</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public JsonSerializer&lt;?&gt; createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException &#123;</span><br><span class="line"></span><br><span class="line">        Sensitive annotation = property.getAnnotation(Sensitive.class);</span><br><span class="line">        if (Objects.nonNull(annotation)&amp;&amp;Objects.equals(String.class, property.getType().getRawClass())) &#123;</span><br><span class="line">            this.strategy = annotation.strategy();</span><br><span class="line">            return this;</span><br><span class="line">        &#125;</span><br><span class="line">        return prov.findValueSerializer(property.getType(), property);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="4-定义Person类，对其数据脱敏"><a href="#4-定义Person类，对其数据脱敏" class="headerlink" title="4. 定义Person类，对其数据脱敏"></a>4. 定义Person类，对其数据脱敏</h3><p>使用注解 <code>@Sensitive</code>注解进行数据脱敏，代码如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">@Data</span><br><span class="line">public class Person &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 真实姓名</span><br><span class="line">     */</span><br><span class="line">    @Sensitive(strategy = SensitiveStrategy.USERNAME)</span><br><span class="line">    private String realName;</span><br><span class="line">    /**</span><br><span class="line">     * 地址</span><br><span class="line">     */</span><br><span class="line">    @Sensitive(strategy = SensitiveStrategy.ADDRESS)</span><br><span class="line">    private String address;</span><br><span class="line">    /**</span><br><span class="line">     * 电话号码</span><br><span class="line">     */</span><br><span class="line">    @Sensitive(strategy = SensitiveStrategy.PHONE)</span><br><span class="line">    private String phoneNumber;</span><br><span class="line">    /**</span><br><span class="line">     * 身份证号码</span><br><span class="line">     */</span><br><span class="line">    @Sensitive(strategy = SensitiveStrategy.ID_CARD)</span><br><span class="line">    private String idCard;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="5-模拟接口测试"><a href="#5-模拟接口测试" class="headerlink" title="5. 模拟接口测试"></a>5. 模拟接口测试</h3><p>以上4个步骤完成了数据脱敏的Jackson注解，下面写个controller进行测试，代码如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@RestController</span><br><span class="line">public class TestController &#123;</span><br><span class="line">    @GetMapping(&quot;/test&quot;)</span><br><span class="line">    public Person test()&#123;</span><br><span class="line">        Person user = new Person();</span><br><span class="line">        user.setRealName(&quot;不才陈某&quot;);</span><br><span class="line">        user.setPhoneNumber(&quot;19796328206&quot;);</span><br><span class="line">        user.setAddress(&quot;浙江省杭州市....&quot;);</span><br><span class="line">        user.setIdCard(&quot;4333333333334334333&quot;);</span><br><span class="line">        return user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>调用接口查看数据有没有正常脱敏，结果如下：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;realName&quot;: &quot;不*陈某&quot;,</span><br><span class="line">    &quot;address&quot;: &quot;浙江省****市..****&quot;,</span><br><span class="line">    &quot;phoneNumber&quot;: &quot;197****8206&quot;,</span><br><span class="line">    &quot;idCard&quot;: &quot;4333****34333&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h3><p>数据脱敏有很多种实现方式，关键是哪种更加适合，哪种更加优雅…..</p><p>参考：</p><blockquote><p><a href="https://mp.weixin.qq.com/s/hMoyMeweMQfKLeKo-yCPFA"># 一个注解优雅的实现 接口数据脱敏</a></p></blockquote>]]></content>
       
@@ -675,9 +675,9 @@
       
         <tags>
             
-            <tag> 魔鬼命令 </tag>
-            
             <tag> 随记 </tag>
+            
+            <tag> 魔鬼命令 </tag>
             
             <tag> Jenkins </tag>
             
@@ -758,9 +758,9 @@
       
         <tags>
             
-            <tag> 影视资源 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 影视资源 </tag>
             
         </tags>
       
@@ -841,9 +841,9 @@
       
         <tags>
             
-            <tag> 分享 </tag>
-            
             <tag> 福利 </tag>
+            
+            <tag> 分享 </tag>
             
             <tag> 薅羊毛 </tag>
             
@@ -870,9 +870,9 @@
       
         <tags>
             
-            <tag> 分享 </tag>
-            
             <tag> 福利 </tag>
+            
+            <tag> 分享 </tag>
             
             <tag> 活动 </tag>
             
@@ -899,9 +899,9 @@
       
         <tags>
             
-            <tag> 影视资源 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 影视资源 </tag>
             
         </tags>
       
@@ -926,9 +926,9 @@
       
         <tags>
             
-            <tag> 影视资源 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 影视资源 </tag>
             
         </tags>
       
@@ -1038,11 +1038,11 @@
       
         <tags>
             
-            <tag> 影视资源 </tag>
+            <tag> 福利 </tag>
             
             <tag> 分享 </tag>
             
-            <tag> 福利 </tag>
+            <tag> 影视资源 </tag>
             
         </tags>
       
@@ -1069,9 +1069,9 @@
             
             <tag> Linux </tag>
             
-            <tag> Docker </tag>
-            
             <tag> 随记 </tag>
+            
+            <tag> Docker </tag>
             
         </tags>
       
@@ -1096,9 +1096,9 @@
       
         <tags>
             
-            <tag> 分享 </tag>
-            
             <tag> 福利 </tag>
+            
+            <tag> 分享 </tag>
             
             <tag> 开源软件 </tag>
             
@@ -1127,11 +1127,11 @@
             
             <tag> Linux </tag>
             
-            <tag> 魔鬼命令 </tag>
-            
             <tag> 随记 </tag>
             
             <tag> Nginx </tag>
+            
+            <tag> 魔鬼命令 </tag>
             
         </tags>
       
@@ -1189,11 +1189,11 @@
             
             <tag> Linux </tag>
             
+            <tag> 随记 </tag>
+            
             <tag> Docker </tag>
             
             <tag> 魔鬼命令 </tag>
-            
-            <tag> 随记 </tag>
             
             <tag> MySQL </tag>
             
@@ -1251,9 +1251,9 @@
             
             <tag> Linux </tag>
             
-            <tag> 魔鬼命令 </tag>
-            
             <tag> 随记 </tag>
+            
+            <tag> 魔鬼命令 </tag>
             
             <tag> MySQL </tag>
             
@@ -1282,9 +1282,9 @@
             
             <tag> 随记 </tag>
             
-            <tag> SpringBoot </tag>
-            
             <tag> Jackson </tag>
+            
+            <tag> SpringBoot </tag>
             
             <tag> 日期输出 </tag>
             
