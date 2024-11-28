@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>OpenVPN 安装</title>
+      <link href="//articles/2024/11/28/20241128155719.html"/>
+      <url>//articles/2024/11/28/20241128155719.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="OpenVPN"><a href="#OpenVPN" class="headerlink" title="OpenVPN"></a>OpenVPN</h1><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><blockquote><p><a href="https://openvpn.net/">官方网站</a></p></blockquote><blockquote><p><a href="https://github.com/OpenVPN/openvpn">GitHub</a></p></blockquote><p> 💡 OpenVPN是一个虚拟专用网络(VPN)系统，采用各种技术创建在路由或桥接配置中的安全点对点或站点对站点连接，以及远程访问设施。它实现了客户端和服务器应用程序。</p><p>它是一个开源项目，遵循GPL许可。OpenVPN允许创建一个加密的隧道，通过这个隧道，数据可以在互联网上安全地传输，从而实现远程访问或连接不同网络的功能。该系统极具灵活性，支持多种加密标准和认证机制，并且能够在各式各样的网络环境中部署，包括通过NAT和防火墙。</p><p>OpenVPN广泛应用于个人隐私保护、企业远程工作、安全链接云计算环境等场景，是商业和个人用户常用的VPN解决方案之一。</p><hr><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>部署OpenVPN服务器使用Docker可以简化安装和配置过程。以下是一个基本的步骤指南，帮助你通过Docker部署OpenVPN服务器：</p><h3 id="步骤-1-安装Docker"><a href="#步骤-1-安装Docker" class="headerlink" title="步骤 1: 安装Docker"></a>步骤 1: 安装Docker</h3><p>首先，确保你的系统上安装了Docker。如果还没有安装，可以根据你的操作系统访问 <a href="https://www.docker.com/products/docker-desktop">Docker官方网站</a> 获取安装指南。</p><h3 id="步骤-2-选择一个OpenVPN镜像"><a href="#步骤-2-选择一个OpenVPN镜像" class="headerlink" title="步骤 2: 选择一个OpenVPN镜像"></a>步骤 2: 选择一个OpenVPN镜像</h3><p>在Docker Hub上有多个OpenVPN的镜像可供选择。一个流行的选择是使用 <a href="https://hub.docker.com/r/kylemanna/openvpn/">kylemanna&#x2F;openvpn</a> 镜像。该镜像广泛被社区使用，并有良好的文档支持。</p><h3 id="步骤-3-创建Docker容器"><a href="#步骤-3-创建Docker容器" class="headerlink" title="步骤 3: 创建Docker容器"></a>步骤 3: 创建Docker容器</h3><ol><li><p><strong>初始化OpenVPN数据卷</strong>:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create --name openvpn-data</span><br></pre></td></tr></table></figure></li><li><p><strong>生成OpenVPN配置与服务器证书</strong>:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -v openvpn-data:/etc/openvpn --<span class="built_in">rm</span> kylemanna/openvpn ovpn_genconfig -u udp://VPN.SERVERNAME.COM</span><br><span class="line">docker run -v openvpn-data:/etc/openvpn --<span class="built_in">rm</span> -it kylemanna/openvpn ovpn_initpki</span><br></pre></td></tr></table></figure><p>替换 <code>VPN.SERVERNAME.COM</code> 为你的实际服务器地址。</p></li><li><p><strong>启动OpenVPN服务器</strong>:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v openvpn-data:/etc/openvpn -d -p 1194:1194/udp --cap-add=NET_ADMIN kylemanna/openvpn</span><br></pre></td></tr></table></figure><p>这里 <code>-d</code> 使容器在后台运行，<code>-p 1194:1194/udp</code> 将容器的1194端口映射到主机的1194端口，<code>--cap-add=NET_ADMIN</code> 给予容器一些网络管理相关的权限，这对于运行VPN是必要的。</p></li></ol><h3 id="步骤-4-创建客户端证书"><a href="#步骤-4-创建客户端证书" class="headerlink" title="步骤 4: 创建客户端证书"></a>步骤 4: 创建客户端证书</h3><ol><li><p><strong>生成客户端证书</strong>:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v openvpn-data:/etc/openvpn --<span class="built_in">rm</span> -it kylemanna/openvpn easyrsa build-client-full CLIENTNAME nopass</span><br></pre></td></tr></table></figure><p>替换 <code>CLIENTNAME</code> 为你想要的客户端证书名。</p></li><li><p><strong>检索客户端配置文件</strong>:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v openvpn-data:/etc/openvpn --<span class="built_in">rm</span> kylemanna/openvpn ovpn_getclient CLIENTNAME &gt; CLIENTNAME.ovpn</span><br></pre></td></tr></table></figure><p>这会生成一个名为 <code>CLIENTNAME.ovpn</code> 的文件，这是客户端需要使用的配置文件。</p></li></ol><h3 id="步骤-5-连接到VPN"><a href="#步骤-5-连接到VPN" class="headerlink" title="步骤 5: 连接到VPN"></a>步骤 5: 连接到VPN</h3><p>将生成的 <code>.ovpn</code> 文件导入到你的OpenVPN客户端软件中（如 OpenVPN Connect 或其他支持OpenVPN的客户端软件），然后尝试连接。</p><p>这些步骤为你提供了一个基础的OpenVPN服务器部署方法。根据你的具体需求，你可能还需要进行进一步的配置和调优，如调整加密设置、配置路由选项等。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 技术分享 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 服务器 </tag>
+            
+            <tag> 运维 </tag>
+            
+            <tag> VPN </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>访微信朋友圈的博客，记录简单生活</title>
       <link href="//articles/2024/04/29/20240429155719.html"/>
       <url>//articles/2024/04/29/20240429155719.html</url>
@@ -323,11 +352,11 @@
             
             <tag> Java </tag>
             
+            <tag> 多线程 </tag>
+            
             <tag> JUC </tag>
             
             <tag> 线程池 </tag>
-            
-            <tag> 多线程 </tag>
             
         </tags>
       
@@ -354,9 +383,9 @@
             
             <tag> Java </tag>
             
-            <tag> 多线程 </tag>
-            
             <tag> 并发 </tag>
+            
+            <tag> 多线程 </tag>
             
             <tag> 原子 </tag>
             
@@ -758,9 +787,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> 魔鬼命令 </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> Jenkins </tag>
             
@@ -787,9 +816,9 @@
       
         <tags>
             
-            <tag> 分享 </tag>
-            
             <tag> Tools </tag>
+            
+            <tag> 分享 </tag>
             
         </tags>
       
@@ -924,9 +953,9 @@
       
         <tags>
             
-            <tag> 福利 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 福利 </tag>
             
             <tag> 薅羊毛 </tag>
             
@@ -953,9 +982,9 @@
       
         <tags>
             
-            <tag> 福利 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 福利 </tag>
             
             <tag> 活动 </tag>
             
@@ -1067,9 +1096,9 @@
             
             <tag> 随记 </tag>
             
-            <tag> 分享 </tag>
-            
             <tag> Tools </tag>
+            
+            <tag> 分享 </tag>
             
         </tags>
       
@@ -1094,9 +1123,9 @@
       
         <tags>
             
-            <tag> Python </tag>
-            
             <tag> 随记 </tag>
+            
+            <tag> Python </tag>
             
         </tags>
       
@@ -1121,11 +1150,11 @@
       
         <tags>
             
-            <tag> 福利 </tag>
-            
             <tag> 分享 </tag>
             
             <tag> 影视资源 </tag>
+            
+            <tag> 福利 </tag>
             
         </tags>
       
@@ -1150,11 +1179,11 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> Linux </tag>
             
             <tag> Docker </tag>
+            
+            <tag> 随记 </tag>
             
         </tags>
       
@@ -1179,9 +1208,9 @@
       
         <tags>
             
-            <tag> 福利 </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> 福利 </tag>
             
             <tag> 开源软件 </tag>
             
@@ -1208,13 +1237,13 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> Linux </tag>
             
-            <tag> Nginx </tag>
-            
             <tag> 魔鬼命令 </tag>
+            
+            <tag> 随记 </tag>
+            
+            <tag> Nginx </tag>
             
         </tags>
       
@@ -1270,13 +1299,13 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> Linux </tag>
             
             <tag> Docker </tag>
             
             <tag> 魔鬼命令 </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> MySQL </tag>
             
@@ -1332,11 +1361,11 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> Linux </tag>
             
             <tag> 魔鬼命令 </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> MySQL </tag>
             
