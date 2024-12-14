@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>Docker 数据迁移</title>
+      <link href="//articles/2024/12/14/20241214155719.html"/>
+      <url>//articles/2024/12/14/20241214155719.html</url>
+      
+        <content type="html"><![CDATA[<h1 id="Docker-迁移"><a href="#Docker-迁移" class="headerlink" title="Docker 迁移"></a>Docker 迁移</h1><h2 id="迁移目录"><a href="#迁移目录" class="headerlink" title="迁移目录"></a>迁移目录</h2><p>主要是为了不让Docker镜像，容器占用系统盘的容量！</p><p>如果就一块盘或者系统盘容量大，这部分内容可忽略！</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#测试安装NGINX</span></span><br><span class="line">docker pull nginx</span><br><span class="line">docker run -d -p 8080:80 nginx</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 给Docker廋身一下</span></span><br><span class="line"><span class="comment">#docker system prune</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#停止Docker服务</span></span><br><span class="line">systemctl stop docker</span><br><span class="line"> </span><br><span class="line"><span class="comment">#创建目标目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /data/docker/</span><br><span class="line"> </span><br><span class="line"><span class="comment">#同步源目录文件 -&gt; 目标目录</span></span><br><span class="line">rsync -avz /var/lib/docker/ /data/docker</span><br><span class="line"> </span><br><span class="line"><span class="comment">#修改Docker配置文件</span></span><br><span class="line">vim /etc/docker/daemon.json</span><br><span class="line"> </span><br><span class="line"><span class="comment">#修改或者新增内容如下</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;data-root&quot;</span>: <span class="string">&quot;/data/docker&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">#启动Docker服务 </span></span><br><span class="line">systemctl start docker</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 查看是否修改成功</span></span><br><span class="line">docker info | grep <span class="string">&quot;Docker Root Dir&quot;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#输出：Docker Root Dir: /data/docker  就OK了！</span></span><br><span class="line"></span><br></pre></td></tr></table></figure><h2 id="挂载"><a href="#挂载" class="headerlink" title="挂载"></a>挂载</h2><p>完整步骤如下：</p><ol><li>停止Docker服务</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop docker</span><br></pre></td></tr></table></figure><ol start="2"><li>备份原Docker数据</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">mkdir</span> -p /var/lib/docker.backup</span><br><span class="line">sudo <span class="built_in">cp</span> -R /var/lib/docker/* /var/lib/docker.backup/</span><br></pre></td></tr></table></figure><ol start="3"><li>确保目标目录存在</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">mkdir</span> -p /data1/docker</span><br></pre></td></tr></table></figure><ol start="4"><li>将原Docker数据完整拷贝到新目录</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rsync -avx /var/lib/docker/ /data1/docker/</span><br></pre></td></tr></table></figure><ol start="5"><li>修改 <code>/etc/rc.local</code> 文件</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/rc.local</span><br></pre></td></tr></table></figure><p>添加以下内容：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">mount --<span class="built_in">bind</span> /data1/docker /var/lib/docker</span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure><ol start="6"><li>确保 <code>/etc/rc.local</code> 有执行权限</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">chmod</span> +x /etc/rc.local</span><br></pre></td></tr></table></figure><ol start="7"><li>创建 systemd 服务文件（如果不存在）</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/systemd/system/rc-local.service</span><br></pre></td></tr></table></figure><p>内容如下：</p><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=/etc/rc.local Compatibility</span><br><span class="line"><span class="attr">ConditionPathExists</span>=/etc/rc.local</span><br><span class="line"><span class="attr">After</span>=network.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=<span class="literal">on</span>eshot</span><br><span class="line"><span class="attr">ExecStart</span>=/etc/rc.local</span><br><span class="line"><span class="attr">RemainAfterExit</span>=<span class="literal">yes</span></span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure><ol start="8"><li>启用并启动 rc-local 服务</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> rc-local</span><br><span class="line">sudo systemctl start rc-local</span><br></pre></td></tr></table></figure><ol start="9"><li>启动Docker服务</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure><ol start="10"><li>验证</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查挂载</span></span><br><span class="line">mount | grep docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证Docker目录</span></span><br><span class="line">docker info | grep <span class="string">&quot;Docker Root Dir&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查容器和镜像是否正常</span></span><br><span class="line">docker ps</span><br><span class="line">docker images</span><br></pre></td></tr></table></figure><ol start="11"><li>可选：清理备份</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认一切正常后，可以删除备份</span></span><br><span class="line">sudo <span class="built_in">rm</span> -rf /var/lib/docker.backup</span><br></pre></td></tr></table></figure><p>注意事项：</p><ul><li>先在测试环境验证</li><li>确保有完整的数据备份</li><li>检查所有容器和服务是否正常</li></ul><h2 id="关于-etc-rc-local说明"><a href="#关于-etc-rc-local说明" class="headerlink" title="关于&#x2F;etc&#x2F;rc.local说明"></a>关于&#x2F;etc&#x2F;rc.local说明</h2><p><code>/etc/rc.local</code> 是一个传统的系统启动脚本，在系统启动的最后阶段运行。</p><p>主要特点：</p><ul><li>系统启动后最后执行的脚本</li><li>可以添加自定义的启动时需要执行的命令</li><li>在早期Linux系统中常用于开机启动自定义脚本</li><li>现代systemd系统中已经逐渐被 systemd 服务替代</li></ul><p>使用方法：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看是否存在</span></span><br><span class="line"><span class="built_in">ls</span> /etc/rc.local</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看内容</span></span><br><span class="line"><span class="built_in">cat</span> /etc/rc.local</span><br></pre></td></tr></table></figure><p>在现代 systemd 的系统中（如CentOS 7+），如果要添加开机启动项，更推荐的方式是：</p><ol><li>创建systemd service文件</li><li>使用 <code>systemctl enable</code> 命令</li></ol><p>在排查Docker存储位置的特殊配置时，<code>/etc/rc.local</code> 可能包含一些自定义的挂载或配置命令。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 技术分享 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Docker </tag>
+            
+            <tag> 服务器 </tag>
+            
+            <tag> 运维 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>OpenVPN 安装</title>
       <link href="//articles/2024/11/28/20241128155719.html"/>
       <url>//articles/2024/11/28/20241128155719.html</url>
@@ -352,11 +381,11 @@
             
             <tag> Java </tag>
             
-            <tag> 多线程 </tag>
-            
             <tag> JUC </tag>
             
             <tag> 线程池 </tag>
+            
+            <tag> 多线程 </tag>
             
         </tags>
       
@@ -383,9 +412,9 @@
             
             <tag> Java </tag>
             
-            <tag> 并发 </tag>
-            
             <tag> 多线程 </tag>
+            
+            <tag> 并发 </tag>
             
             <tag> 原子 </tag>
             
@@ -787,9 +816,9 @@
       
         <tags>
             
-            <tag> 魔鬼命令 </tag>
-            
             <tag> 随记 </tag>
+            
+            <tag> 魔鬼命令 </tag>
             
             <tag> Jenkins </tag>
             
@@ -816,9 +845,9 @@
       
         <tags>
             
-            <tag> Tools </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> Tools </tag>
             
         </tags>
       
@@ -897,9 +926,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> SpringBoot </tag>
+            
+            <tag> 随记 </tag>
             
         </tags>
       
@@ -924,9 +953,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> SpringBoot </tag>
+            
+            <tag> 随记 </tag>
             
         </tags>
       
@@ -1096,9 +1125,9 @@
             
             <tag> 随记 </tag>
             
-            <tag> Tools </tag>
-            
             <tag> 分享 </tag>
+            
+            <tag> Tools </tag>
             
         </tags>
       
@@ -1152,9 +1181,9 @@
             
             <tag> 分享 </tag>
             
-            <tag> 影视资源 </tag>
-            
             <tag> 福利 </tag>
+            
+            <tag> 影视资源 </tag>
             
         </tags>
       
@@ -1179,11 +1208,11 @@
       
         <tags>
             
+            <tag> 随记 </tag>
+            
             <tag> Linux </tag>
             
             <tag> Docker </tag>
-            
-            <tag> 随记 </tag>
             
         </tags>
       
@@ -1237,11 +1266,11 @@
       
         <tags>
             
+            <tag> 随记 </tag>
+            
             <tag> Linux </tag>
             
             <tag> 魔鬼命令 </tag>
-            
-            <tag> 随记 </tag>
             
             <tag> Nginx </tag>
             
@@ -1268,9 +1297,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> SpringBoot </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> Spring </tag>
             
@@ -1299,13 +1328,13 @@
       
         <tags>
             
+            <tag> 随记 </tag>
+            
             <tag> Linux </tag>
             
             <tag> Docker </tag>
             
             <tag> 魔鬼命令 </tag>
-            
-            <tag> 随记 </tag>
             
             <tag> MySQL </tag>
             
@@ -1332,9 +1361,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> SpringBoot </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> 事务Transaction </tag>
             
@@ -1361,11 +1390,11 @@
       
         <tags>
             
+            <tag> 随记 </tag>
+            
             <tag> Linux </tag>
             
             <tag> 魔鬼命令 </tag>
-            
-            <tag> 随记 </tag>
             
             <tag> MySQL </tag>
             
@@ -1392,13 +1421,13 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> Jackson </tag>
             
             <tag> SpringBoot </tag>
             
             <tag> 日期输出 </tag>
+            
+            <tag> 随记 </tag>
             
         </tags>
       
@@ -1423,9 +1452,9 @@
       
         <tags>
             
-            <tag> 随记 </tag>
-            
             <tag> SpringBoot </tag>
+            
+            <tag> 随记 </tag>
             
             <tag> 趣味编程 </tag>
             
